@@ -2,7 +2,10 @@ import os
 import logging
 from contextlib import asynccontextmanager
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, CallbackQueryHandler, filters
+from telegram.ext import (
+    Application, CommandHandler, MessageHandler, CallbackQueryHandler,
+    ConversationHandler, filters  # <-- добавили ConversationHandler
+)
 from starlette.applications import Starlette
 from starlette.responses import JSONResponse, PlainTextResponse
 from starlette.routing import Route
@@ -18,7 +21,6 @@ from handlers import (
 
 logging.basicConfig(level=logging.INFO)
 
-# Глобальная переменная для бота (альтернатива хранению в app.state)
 _bot_app = None
 
 async def init_bot() -> Application:
@@ -27,7 +29,7 @@ async def init_bot() -> Application:
         return _bot_app
     init_db()
     app = Application.builder().token(os.environ["TELEGRAM_TOKEN"]).build()
-    # Добавляем все обработчики
+
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler('start', start)],
         states={
